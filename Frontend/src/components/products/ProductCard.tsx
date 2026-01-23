@@ -1,17 +1,16 @@
 import './ProductCard.css'
 
 interface ProductCardProps {
-  id: number | string;   // ✅ ADICIONADO
-  image: string;
-  name: string;
-  price: number;
-  oldPrice?: number;
-  store: string;
-  rating?: number;
+  image: string
+  name: string
+  price: number
+  oldPrice?: number
+  store?: string
+  rating?: number
 }
 
+
 export default function ProductCard({
-  id,
   image,
   name,
   price,
@@ -19,6 +18,7 @@ export default function ProductCard({
   store,
   rating
 }: ProductCardProps) {
+
   return (
     <div className="product-card">
       <img src={image} alt={name} />
