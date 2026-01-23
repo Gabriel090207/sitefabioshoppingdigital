@@ -107,14 +107,14 @@ export default function Store() {
   <div className="store-products-inner">
     <div className="store-products-grid">
       {products.map((product) => (
-       <ProductCard
-  key={product.id}
-  id={product.id}
-  name={product.name}
-  price={product.price}
-  image={product.image}
-  store={product.store}   // ✅ OBRIGATÓRIO
-/>
+      <ProductCard
+      key={product.id}
+      name={product.name}
+      price={product.price}
+      image={product.image}
+      store="Mercado"
+    />
+    
 
       ))}
     </div>
