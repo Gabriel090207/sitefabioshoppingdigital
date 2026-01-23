@@ -1,0 +1,63 @@
+/* ===============================
+   DIVIDER - CONFIGURAÇÕES GLOBAIS
+   Edite APENAS este valor
+   =============================== */
+   :root {
+    --divider-line-width: 820px; /* controla o tamanho das linhas */
+  }
+  
+  /* ===============================
+     DIVIDER CONTAINER
+     =============================== */
+  .divider {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* mantém tudo centralizado */
+    gap: 24px;
+  
+    max-width: 12000px;
+    margin: 80px auto;
+  }
+  
+  /* ===============================
+     LINHAS LATERAIS
+     =============================== */
+  .divider-line {
+    width: var(--divider-line-width);
+    height: 2px;
+    background-color: #1e3a8a; /* azul do Shopping Digital */
+    opacity: 0.9;
+  }
+  
+  /* ===============================
+     CENTRO (LOGO)
+     =============================== */
+  .divider-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .divider-image {
+    width: 42px;
+    height: auto;
+  }
+  
+  /* ===============================
+     RESPONSIVO
+     =============================== */
+  @media (max-width: 768px) {
+    :root {
+      --divider-line-width: 80px;
+    }
+  
+    .divider {
+      margin: 48px auto;
+      gap: 16px;
+    }
+  
+    .divider-image {
+      width: 32px;
+    }
+  }
+  
