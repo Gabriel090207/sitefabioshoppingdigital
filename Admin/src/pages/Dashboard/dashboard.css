@@ -62,13 +62,31 @@
   border: 1px solid #d1d5db;
   background: white;
   cursor: pointer;
+
+  transition: all 0.2s ease;
 }
 
+/* hover botão normal */
+.quick-actions button:hover {
+  background: #f8fafc;
+  border-color: #cbd5f5;
+  transform: translateY(-1px);
+}
+
+/* botão principal */
 .quick-actions .primary {
   background: var(--green);
   color: white;
   border: none;
+
 }
+
+.quick-actions .primary:hover {
+  background: var(--green);
+    transform: translateY(-1px);
+    opacity: 0.9;
+}
+
 
 /* ===== CARDS LATERAIS ===== */
 
