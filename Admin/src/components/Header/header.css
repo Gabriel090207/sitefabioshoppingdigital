@@ -1,0 +1,132 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 84px;
+  width: 100%;
+  background: linear-gradient(90deg, #0a2a66, #0f3a8a);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 1000;
+}
+
+/* ===== ESQUERDA ===== */
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+
+.logo-text {
+  font-size: 21px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* ===== DIREITA ===== */
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  margin-right: 10px;
+  font-size: 18px;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.user-name {
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.user-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: var(--green);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+/* ===== MENU MOBILE ===== */
+
+.menu-mobile {
+  display: none;
+  font-size: 26px;
+  color: white;
+  cursor: pointer;
+}
+
+/* ===============================
+   RESPONSIVIDADE
+================================*/
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .logo-text {
+    font-size: 18px;
+  }
+
+  .header {
+    padding: 0 16px;
+  }
+}
+
+/* Celular */
+@media (max-width: 768px) {
+  .header {
+    height: 70px;
+    padding: 0 12px;
+  }
+
+  .menu-mobile {
+    display: block;
+  }
+
+  .logo-img,
+  .logo-text {
+    display: none;
+  }
+
+  .user-name {
+    display: none;
+  }
+
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .header-icon {
+    font-size: 20px;
+  }
+}
+
+/* Celular pequeno */
+@media (max-width: 480px) {
+  .header {
+    padding: 0 10px;
+  }
+
+  .header-right {
+    gap: 10px;
+  }
+}

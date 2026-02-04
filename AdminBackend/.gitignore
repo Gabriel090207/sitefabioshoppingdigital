@@ -1,0 +1,15 @@
+# ambiente python
+venv/
+__pycache__/
+
+# chave firebase
+firebase-key.json
+
+# arquivos temporários
+*.pyc
+*.pyo
+*.pyd
+
+# sistema
+.DS_Store
+.env

@@ -1,0 +1,112 @@
+.produto-page {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px 48px;
+}
+
+/* ===== HEADER ===== */
+
+.produto-header {
+  margin-top: 40px;
+  margin-bottom: 24px;
+}
+
+.produto-header h1 {
+  margin-top: 12px;
+  color: var(--blue);
+}
+
+/* ===== VOLTAR ===== */
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--blue);
+  font-weight: 500;
+  margin-top: -20px;
+  margin-bottom: 10px;
+}
+
+.back-button:hover {
+  opacity: 0.8;
+}
+
+/* ===== UPLOAD (PADRÃO LOJA) ===== */
+
+.upload-group {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.upload-box label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.upload-area {
+  position: relative;
+  border: 2px dashed var(--blue);
+  border-radius: 14px;
+  padding: 92px;
+  background-color: #f8faff;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.upload-area:hover {
+  background-color: #eef2ff;
+  border-color: var(--blue-light);
+}
+
+.upload-area input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.upload-icon {
+  font-size: 34px;
+  color: var(--blue);
+}
+
+.upload-content strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ===== RESPONSIVO ===== */
+
+@media (max-width: 768px) {
+  .produto-page {
+    padding: 0 16px 32px;
+  }
+
+  .upload-area {
+    padding: 48px 16px;
+  }
+
+  .button-primary {
+    width: 100%;
+  }
+}
+

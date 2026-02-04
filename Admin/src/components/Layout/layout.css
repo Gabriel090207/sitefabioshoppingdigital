@@ -1,0 +1,42 @@
+.layout {
+  display: flex;
+}
+
+/* ===== CONTEÚDO ===== */
+
+.content {
+  margin-left: 280px; /* largura sidebar */
+  margin-top: 84px;   /* altura header */
+  width: calc(100vw - 280px);
+  min-height: calc(100vh - 84px);
+  padding: 32px;
+}
+
+/* ===============================
+   RESPONSIVIDADE
+================================*/
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .content {
+    margin-left: 240px;
+    width: calc(100vw - 240px);
+    padding: 24px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .content {
+    margin-left: 0;
+    width: 100vw;
+    padding: 20px;
+  }
+}
+
+/* Mobile pequeno */
+@media (max-width: 480px) {
+  .content {
+    padding: 16px;
+  }
+}
