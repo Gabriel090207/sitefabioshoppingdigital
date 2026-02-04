@@ -2,32 +2,103 @@ import { Link, useParams } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
 import "./visualizarLoja.css";
 
-const products = [
-  {
-    id: 1,
-    name: "Banana Prata",
-    price: 3.99,
-    image:
-      "https://images.unsplash.com/photo-1574226516831-e1dff420e42e",
-  },
-  {
-    id: 2,
-    name: "Maçã Gala",
-    price: 4.99,
-    image:
-      "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce",
-  },
-  {
-    id: 3,
-    name: "Tomate",
-    price: 6.49,
-    image:
-      "https://images.unsplash.com/photo-1567306301408-9b74779a11af",
-  },
-];
+import { useEffect, useState } from "react";
+
+import { db } from "../../services/firebase";
+import {
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+} from "firebase/firestore";
+
+import ProductCard from "../../components/ProductCard/ProductCard";
 
 export default function VisualizarLoja() {
   const { lojaId } = useParams();
+
+  const [loja, setLoja] = useState<any>(null);
+  const [produtos, setProdutos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function carregarLoja() {
+      if (!lojaId) return;
+
+      try {
+        /* ===== BUSCAR LOJA ===== */
+        const docRef = doc(db, "lojas", lojaId);
+        const docSnap = await getDoc(docRef);
+
+        if (!docSnap.exists()) {
+          console.log("Loja não encontrada");
+          setLoading(false);
+          return;
+        }
+
+        setLoja(docSnap.data());
+
+        /* ===== BUSCAR PRODUTOS ===== */
+        const produtosRef = collection(
+          db,
+          "lojas",
+          lojaId,
+          "produtos"
+        );
+
+        const produtosSnap = await getDocs(produtosRef);
+
+        const listaProdutos: any[] = [];
+
+        produtosSnap.forEach((docItem) => {
+          const data: any = docItem.data();
+
+          /* converte preço string -> número */
+          const preco =
+            typeof data.preco === "string"
+              ? parseFloat(data.preco.replace(",", "."))
+              : data.preco || 0;
+
+          const precoPromo =
+            typeof data.precoPromocional === "string"
+              ? parseFloat(data.precoPromocional.replace(",", "."))
+              : data.precoPromocional;
+
+          listaProdutos.push({
+            id: docItem.id,
+
+            name: data.nome || "Produto",
+            price: precoPromo ?? preco,
+            oldPrice: precoPromo ? preco : undefined,
+
+            /* pega primeira imagem */
+            image:
+              Array.isArray(data.imagens) && data.imagens.length > 0
+                ? data.imagens[0]
+                : "",
+
+            rating: data.rating || 0,
+          });
+        });
+
+        setProdutos(listaProdutos);
+      } catch (error) {
+        console.error("Erro ao buscar loja:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    carregarLoja();
+  }, [lojaId]);
+
+  if (loading) {
+    return <div>Carregando loja...</div>;
+  }
+
+  if (!loja) {
+    return <div>Loja não encontrada.</div>;
+  }
 
   return (
     <div className="store-page">
@@ -39,11 +110,11 @@ export default function VisualizarLoja() {
         </Link>
       </div>
 
-      {/* CAPA */}
+      {/* BANNER */}
       <div className="store-cover">
         <img
-          src="https://images.unsplash.com/photo-1542838132-92c53300491e"
-          alt="Capa"
+          src={loja?.imagens?.banner || ""}
+          alt="Banner da loja"
         />
       </div>
 
@@ -51,14 +122,21 @@ export default function VisualizarLoja() {
       <div className="store-header">
         <div className="store-header-inner">
           <img
-            src="https://images.unsplash.com/photo-1606787366850-de6330128bfc"
-            alt="Logo"
+            src={loja?.imagens?.perfil || ""}
+            alt="Logo da loja"
             className="store-avatar"
           />
 
           <div className="store-info">
-            <h1>Mercado do Bairro</h1>
-            <span>ID: {lojaId}</span>
+            <h1>{loja?.nome}</h1>
+
+            <span className="store-meta">
+              {loja?.categoria} •{" "}
+              {loja?.endereco?.bairro} -{" "}
+              {loja?.endereco?.cidade}/
+              {loja?.endereco?.estado} • Atende:{" "}
+              {loja?.atendimento?.area}
+            </span>
           </div>
         </div>
       </div>
@@ -67,15 +145,20 @@ export default function VisualizarLoja() {
       <div className="store-products">
         <div className="store-products-inner">
           <div className="store-products-grid">
-            {products.map((product) => (
-              <div key={product.id} className="product-card">
-                <img src={product.image} />
+            {produtos.length === 0 && (
+              <p>Esta loja ainda não possui produtos.</p>
+            )}
 
-                <div className="product-info">
-                  <strong>{product.name}</strong>
-                  <span>R$ {product.price}</span>
-                </div>
-              </div>
+            {produtos.map((product) => (
+              <ProductCard
+                key={product.id}
+                image={product.image}
+                name={product.name}
+                price={product.price}
+              
+                rating={product.rating}
+                store={loja.nome}
+              />
             ))}
           </div>
         </div>

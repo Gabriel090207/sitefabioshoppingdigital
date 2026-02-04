@@ -10,6 +10,7 @@ import "./produtos.css";
 import {
   collection,
   getDocs,
+  getDoc,
   deleteDoc,
   doc,
   addDoc,
@@ -24,87 +25,36 @@ export default function Produtos() {
   const [produtos, setProdutos] = useState<any[]>([]);
   const [nomeLoja, setNomeLoja] = useState("");
 
-  /* ======================
-     CARREGAR PRODUTOS
-  ====================== */
+  const [mensagem, setMensagem] = useState("");
+  const [produtoExcluir, setProdutoExcluir] = useState<any>(null);
 
-  useEffect(() => {
-    if (!lojaId) return;
-
-    const carregar = async () => {
-
-
-      // buscar dados da loja
-const lojaSnap = await getDocs(
-  collection(db, "lojas")
-);
-
-lojaSnap.forEach((docSnap) => {
-  if (docSnap.id === lojaId) {
-    setNomeLoja(docSnap.data().nome || "");
-  }
-});
-
-      const snapshot = await getDocs(
-        collection(db, "lojas", lojaId, "produtos")
-      );
-
-      const lista: any[] = [];
-
-      snapshot.forEach((docSnap) => {
-        lista.push({
-          id: docSnap.id,
-          ...docSnap.data(),
-        });
-      });
-
-      setProdutos(lista);
-    };
-
-    carregar();
-  }, [lojaId]);
-
-  /* ======================
-     EXCLUIR PRODUTO
-  ====================== */
-
-  const excluirProduto = async (produtoId: string) => {
-    if (!lojaId) return;
-
-    const confirmar = confirm("Excluir produto?");
-    if (!confirmar) return;
-
-    await deleteDoc(
-      doc(db, "lojas", lojaId, "produtos", produtoId)
-    );
-
-    setProdutos((prev) =>
-      prev.filter((p) => p.id !== produtoId)
-    );
+  const mostrarMensagem = (texto: string) => {
+    setMensagem(texto);
+    setTimeout(() => setMensagem(""), 2500);
   };
 
   /* ======================
-     DUPLICAR PRODUTO
+     FECHAR MENU AO CLICAR FORA
   ====================== */
+  useEffect(() => {
+    const fechar = () => setOpenMenu(null);
+    window.addEventListener("click", fechar);
 
-  const duplicarProduto = async (produto: any) => {
+    return () => window.removeEventListener("click", fechar);
+  }, []);
+
+  /* ======================
+     CARREGAR PRODUTOS
+  ====================== */
+  const carregarProdutos = async () => {
     if (!lojaId) return;
 
-    const novo = {
-      ...produto,
-      nome: produto.nome + " (cópia)",
-    };
+    const lojaDoc = await getDoc(doc(db, "lojas", lojaId));
 
-    delete novo.id;
+    if (lojaDoc.exists()) {
+      setNomeLoja(lojaDoc.data().nome || "");
+    }
 
-    await addDoc(
-      collection(db, "lojas", lojaId, "produtos"),
-      novo
-    );
-
-    alert("Produto duplicado!");
-
-    // recarrega lista
     const snapshot = await getDocs(
       collection(db, "lojas", lojaId, "produtos")
     );
@@ -121,6 +71,48 @@ lojaSnap.forEach((docSnap) => {
     setProdutos(lista);
   };
 
+  useEffect(() => {
+    carregarProdutos();
+  }, [lojaId]);
+
+  /* ======================
+     CONFIRMAR EXCLUSÃO
+  ====================== */
+  const confirmarExclusao = async () => {
+    if (!produtoExcluir || !lojaId) return;
+
+    await deleteDoc(
+      doc(db, "lojas", lojaId, "produtos", produtoExcluir.id)
+    );
+
+    setProdutoExcluir(null);
+    mostrarMensagem("Produto excluído!");
+    carregarProdutos();
+  };
+
+  /* ======================
+     DUPLICAR PRODUTO
+  ====================== */
+  const duplicarProduto = async (produto: any) => {
+    if (!lojaId) return;
+
+    const novo = {
+      ...produto,
+      nome: produto.nome + " (cópia)",
+    };
+
+    delete novo.id;
+
+    await addDoc(
+      collection(db, "lojas", lojaId, "produtos"),
+      novo
+    );
+
+    mostrarMensagem("Produto duplicado!");
+    setOpenMenu(null);
+    carregarProdutos();
+  };
+
   return (
     <div className="produtos-page">
       {/* HEADER */}
@@ -130,10 +122,10 @@ lojaSnap.forEach((docSnap) => {
           Voltar para lojas
         </Link>
 
-       <h1>
-  Produtos da Loja {nomeLoja && `- ${nomeLoja}`}
-</h1>
-
+        <h1>
+          Produtos da Loja{" "}
+          {nomeLoja && `- ${nomeLoja}`}
+        </h1>
       </div>
 
       {/* AÇÕES */}
@@ -171,7 +163,10 @@ lojaSnap.forEach((docSnap) => {
               </div>
             </div>
 
-            <div className="loja-actions">
+            <div
+              className="loja-actions"
+              onClick={(e) => e.stopPropagation()}
+            >
               <FiMoreVertical
                 onClick={() =>
                   setOpenMenu(
@@ -182,9 +177,11 @@ lojaSnap.forEach((docSnap) => {
 
               {openMenu === index && (
                 <div className="dropdown">
-                  <button>
-                    Editar produto
-                  </button>
+                  <Link
+                    to={`/lojas/${lojaId}/produtos/${produto.id}/editar`}
+                  >
+                    <button>Editar produto</button>
+                  </Link>
 
                   <button
                     onClick={() =>
@@ -195,9 +192,10 @@ lojaSnap.forEach((docSnap) => {
                   </button>
 
                   <button
-                    onClick={() =>
-                      excluirProduto(produto.id)
-                    }
+                    onClick={() => {
+                      setProdutoExcluir(produto);
+                      setOpenMenu(null);
+                    }}
                   >
                     Excluir
                   </button>
@@ -207,6 +205,51 @@ lojaSnap.forEach((docSnap) => {
           </div>
         ))}
       </div>
+
+      {/* TOAST */}
+      {mensagem && (
+        <div className="toast">{mensagem}</div>
+      )}
+
+      {/* MODAL EXCLUSÃO */}
+      {produtoExcluir && (
+        <div
+          className="modal-overlay"
+          onClick={() => setProdutoExcluir(null)}
+        >
+          <div
+            className="modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>Excluir produto</h3>
+            <p>
+              Deseja realmente excluir{" "}
+              <strong>
+                {produtoExcluir.nome}
+              </strong>
+              ?
+            </p>
+
+            <div className="modal-actions">
+              <button
+                className="btn-cancel"
+                onClick={() =>
+                  setProdutoExcluir(null)
+                }
+              >
+                Cancelar
+              </button>
+
+              <button
+                className="btn-delete"
+                onClick={confirmarExclusao}
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

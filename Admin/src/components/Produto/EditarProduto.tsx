@@ -1,17 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiArrowLeft, FiUploadCloud, FiX } from "react-icons/fi";
 
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
+
 import "./produto.css";
 
 import { db, storage } from "../../services/firebase";
 import {
-
   doc,
-  setDoc,
+  
   serverTimestamp,
+  getDoc,
+  updateDoc,
 } from "firebase/firestore";
-
 
 
 import {
@@ -21,8 +22,11 @@ import {
 
 } from "firebase/storage";
 
-export default function AdicionarProduto() {
-  const { lojaId } = useParams();
+export default function EditarProduto() {
+
+ const { lojaId, produtoId } = useParams();
+const navigate = useNavigate();
+
 
   /* ======================
      STATES
@@ -43,59 +47,39 @@ export default function AdicionarProduto() {
   const [imagens, setImagens] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
+
+  const [imagensExistentes, setImagensExistentes] = useState<string[]>([]);
+
+
+
   /* ======================
      PREVIEW IMAGENS
   ====================== */
 
- const handleImagens = (files: FileList | null) => {
-  if (!files) return;
+  const handleImagens = (files: FileList | null) => {
+    if (!files) return;
 
-  const lista = Array.from(files);
+    const lista = Array.from(files);
 
-  setImagens(lista);
+    setImagens(lista);
 
-  const previewsGeradas = lista.map((file) =>
-    URL.createObjectURL(file)
-  );
+    const previewsGeradas = lista.map((file) =>
+      URL.createObjectURL(file)
+    );
 
-  setPreviews(previewsGeradas);
-};
-
-const removerImagem = (index: number) => {
-  setPreviews(prev => prev.filter((_, i) => i !== index));
-  setImagens(prev => prev.filter((_, i) => i !== index));
-};
-
-
-
-
-  /* ======================
-     LIMPAR FORM
-  ====================== */
-
-  const limparFormulario = () => {
-    setNome("");
-    setCategoria("");
-    setDescricao("");
-
-    setPreco("");
-    setPrecoPromo("");
-    setEstoque("");
-
-    setMarca("");
-    setPeso("");
-    setSku("");
-
-    setImagens([]);
-    setPreviews([]);
+    setPreviews(previewsGeradas);
   };
+
+ 
+
 
   /* ======================
      SALVAR PRODUTO
   ====================== */
 
-  const salvarProduto = async () => {
-    if (!lojaId) return;
+ const salvarProduto = async () => {
+  if (!lojaId || !produtoId) return;
+
 
     if (!nome.trim()) {
       alert("Informe o nome do produto");
@@ -105,15 +89,9 @@ const removerImagem = (index: number) => {
     
     try {
 
-      const nomeBase = nome
-  .toLowerCase()
-  .trim()
-  .replace(/\s+/g, "-")
-  .replace(/[^\w-]+/g, "");
 
-const produtoId = `${nomeBase}-${Date.now()}`;
+      let urlsImagens: string[] = [...imagensExistentes];
 
-      let urlsImagens: string[] = [];
 
       /* ===== upload imagens ===== */
       for (const file of imagens) {
@@ -130,7 +108,8 @@ const produtoId = `${nomeBase}-${Date.now()}`;
       }
 
       /* ===== salvar firestore ===== */
-     await setDoc(
+    await updateDoc(
+
   doc(db, "lojas", lojaId, "produtos", produtoId),
   {
 
@@ -153,14 +132,48 @@ const produtoId = `${nomeBase}-${Date.now()}`;
         }
       );
 
-      alert("Produto salvo com sucesso!");
-      limparFormulario();
+     alert("Produto atualizado com sucesso!");
+navigate(`/lojas/${lojaId}/produtos`);
+
     } catch (error) {
       console.error(error);
       alert("Erro ao salvar produto");
     }
   };
 
+
+
+  useEffect(() => {
+  const carregarProduto = async () => {
+    if (!lojaId || !produtoId) return;
+
+    const snap = await getDoc(
+      doc(db, "lojas", lojaId, "produtos", produtoId)
+    );
+
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+
+    setNome(data.nome || "");
+    setCategoria(data.categoria || "");
+    setDescricao(data.descricao || "");
+
+    setPreco(data.preco || "");
+    setPrecoPromo(data.precoPromocional || "");
+    setEstoque(data.estoque || "");
+
+    setMarca(data.marca || "");
+    setPeso(data.peso || "");
+    setSku(data.sku || "");
+
+   setImagensExistentes(data.imagens || []);
+setPreviews(data.imagens || []);
+
+  };
+
+  carregarProduto();
+}, [lojaId, produtoId]);
 
 
    
@@ -174,7 +187,7 @@ const produtoId = `${nomeBase}-${Date.now()}`;
           Voltar para lojas
         </Link>
 
-        <h1>Adicionar Produto</h1>
+        <h1>Editar Produto</h1>
       </div>
 
       {/* ===== INFO ===== */}
@@ -228,21 +241,25 @@ const produtoId = `${nomeBase}-${Date.now()}`;
 
         {previews.length > 0 && (
           <div style={{ display: "flex", gap: 12, marginTop: 12 }}>
-           {previews.map((img, i) => (
-  <div key={i} className="preview-wrapper">
-    <img
-      src={img}
-      alt=""
-      className="preview-img"
-    />
+            {previews.map((img, i) => (
+     <div key={i} className="preview-wrapper">
+  <img
+    src={img}
+    alt=""
+    className="preview-img"
+  />
 
-    <button
-      className="preview-remove"
-      onClick={() => removerImagem(i)}
-    >
-      <FiX size={14} />
-    </button>
-  </div>
+  <button
+    className="preview-remove"
+    onClick={() => {
+      setPreviews(prev => prev.filter((_, index) => index !== i));
+      setImagensExistentes(prev => prev.filter((_, index) => index !== i));
+    }}
+  >
+    <FiX size={14} />
+  </button>
+</div>
+
 ))}
 
           </div>
@@ -318,7 +335,7 @@ const produtoId = `${nomeBase}-${Date.now()}`;
           className="button-primary"
           onClick={salvarProduto}
         >
-          Salvar Produto
+          Salvar Alterações
         </button>
       </div>
     </div>

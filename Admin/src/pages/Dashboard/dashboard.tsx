@@ -1,41 +1,93 @@
 import { Link } from "react-router-dom";
 import "./dashboard.css";
 
+import { useEffect, useState } from "react";
+import { db } from "../../services/firebase";
+import { collection, getDocs } from "firebase/firestore";
+
 export default function Dashboard() {
+  const [totalLojas, setTotalLojas] = useState(0);
+  
+  const [nichosRanking, setNichosRanking] = useState<any[]>([]);
+  const [ultimasLojas, setUltimasLojas] = useState<any[]>([]);
+  const [nichoTop, setNichoTop] = useState("");
+
+  useEffect(() => {
+    async function carregarDados() {
+      const snapshot = await getDocs(collection(db, "lojas"));
+
+      const lojas: any[] = [];
+      snapshot.forEach((doc) => {
+        lojas.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      /* ===== Totais ===== */
+      setTotalLojas(lojas.length);
+
+      
+
+      /* ===== Nichos ===== */
+      const categorias: any = {};
+
+      lojas.forEach((l) => {
+        const cat = l.categoria || "Outros";
+        categorias[cat] = (categorias[cat] || 0) + 1;
+      });
+
+      const ranking = Object.entries(categorias)
+        .map(([nome, total]) => ({ nome, total }))
+        .sort((a: any, b: any) => b.total - a.total);
+
+      setNichosRanking(ranking.slice(0, 5));
+      setNichoTop(ranking[0]?.nome || "-");
+
+      /* ===== Últimas lojas ===== */
+      const ordenadas = lojas
+        .sort((a, b) => {
+          const aTime = a.createdAt?.seconds || 0;
+          const bTime = b.createdAt?.seconds || 0;
+          return bTime - aTime;
+        })
+        .slice(0, 4);
+
+      setUltimasLojas(ordenadas);
+    }
+
+    carregarDados();
+  }, []);
+
   return (
     <div className="dashboard">
       <h1>Dashboard</h1>
 
-      {/* ===== CARDS TOPO ===== */}
+      {/* CARDS */}
       <div className="dashboard-cards">
         <div className="dash-card">
           <span>Total de lojas</span>
-          <strong>128</strong>
+          <strong>{totalLojas}</strong>
         </div>
 
         <div className="dash-card">
           <span>Nicho com mais lojas</span>
-          <strong>Mercados</strong>
+          <strong>{nichoTop}</strong>
         </div>
 
-        <div className="dash-card">
-          <span>Lojas ativas</span>
-          <strong>112</strong>
-        </div>
 
-        <div className="dash-card">
-          <span>Lojas pendentes</span>
-          <strong>16</strong>
-        </div>
+        
       </div>
 
-      {/* ===== AÇÕES ===== */}
+      {/* AÇÕES */}
       <section className="dashboard-section">
         <h2>Ações rápidas</h2>
 
         <div className="quick-actions">
           <Link to="/lojas/criar">
-            <button className="primary">Cadastrar Loja</button>
+            <button className="primary">
+              Cadastrar Loja
+            </button>
           </Link>
 
           <Link to="/lojas">
@@ -44,48 +96,37 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ===== LISTAS EM CARDS ===== */}
+      {/* LISTAS */}
       <div className="dashboard-lists">
         {/* Últimas lojas */}
         <section className="list-card">
           <h2>Últimas lojas cadastradas</h2>
 
           <ul>
-            <li>
-              Mercado Central <span className="badge">1</span>
-            </li>
-            <li>
-              Padaria São João <span className="badge">2</span>
-            </li>
-            <li>
-              Farmácia Vida <span className="badge">3</span>
-            </li>
-            <li>
-              Lanchonete Top <span className="badge">4</span>
-            </li>
+            {ultimasLojas.map((loja, i) => (
+              <li key={loja.id}>
+                {loja.nome}
+                <span className="badge">
+                  {i + 1}
+                </span>
+              </li>
+            ))}
           </ul>
         </section>
 
-        {/* Ranking nichos */}
+        {/* Nichos */}
         <section className="list-card">
           <h2>Nichos com mais lojas</h2>
 
           <ul>
-            <li>
-              Mercados <span className="badge blue">32</span>
-            </li>
-            <li>
-              Restaurantes <span className="badge blue">25</span>
-            </li>
-            <li>
-              Padarias <span className="badge blue">18</span>
-            </li>
-            <li>
-              Farmácias <span className="badge blue">14</span>
-            </li>
-            <li>
-              Serviços <span className="badge blue">10</span>
-            </li>
+            {nichosRanking.map((nicho) => (
+              <li key={nicho.nome}>
+                {nicho.nome}
+                <span className="badge blue">
+                  {nicho.total}
+                </span>
+              </li>
+            ))}
           </ul>
         </section>
       </div>

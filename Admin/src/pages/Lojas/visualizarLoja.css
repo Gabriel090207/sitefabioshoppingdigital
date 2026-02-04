@@ -75,3 +75,14 @@
 .product-info span {
   color: #374151;
 }
+
+.store-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.store-meta {
+  font-size: 14px;
+  color: #475569;
+}

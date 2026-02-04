@@ -8,6 +8,8 @@ import Produtos from "./components/Produto/Produtos";
 import AdicionarProduto from "./components/Produto/AdicionarProduto";
 import VisualizarLoja from "./pages/Lojas/VisualizarLoja";
 import ScrollToTop from "./components/ScrollToTop";
+import EditarProduto from "./components/Produto/EditarProduto";
+
 
 function App() {
   return (
@@ -23,7 +25,13 @@ function App() {
           <Route path="/lojas/:lojaId/produtos/adicionar" element={<AdicionarProduto />} />
           <Route path="/lojas/:lojaId" element={<VisualizarLoja />} />
           <Route path="/lojas/:lojaId/editar" element={<EditarLoja />} />
+          <Route
+  path="/lojas/:lojaId/produtos/:produtoId/editar"
+  element={<EditarProduto />}
+/>
 
+          
+            
 
 
         </Routes>

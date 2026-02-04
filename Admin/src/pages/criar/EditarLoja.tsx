@@ -96,6 +96,20 @@ const [horarioFechamento, setHorarioFechamento] = useState("");
 
 const { lojaId } = useParams();
 const navigate = useNavigate();
+const [toast, setToast] = useState({
+  texto: "",
+  tipo: "success",
+});
+
+
+
+const mostrarToast = (
+  msg: string,
+  tipo: "success" | "warning" | "error" = "success"
+) => {
+  setToast({ texto: msg, tipo });
+  setTimeout(() => setToast({ texto: "", tipo: "success" }), 3000);
+};
 
 
 useEffect(() => {
@@ -368,39 +382,39 @@ const toggleDia = (dia: string) => {
 
 const validarFormulario = () => {
   if (!cpfCnpj || erroCpfCnpj) {
-    alert("CPF ou CNPJ inválido");
+    mostrarToast("CPF ou CNPJ inválido", "warning");
     return false;
   }
 
   if (!cpfResponsavel || erroCpf) {
-    alert("CPF do responsável inválido");
+    mostrarToast("CPF do responsável inválido","warning");
     return false;
   }
 
   if (!nomeLoja.trim()) {
-  alert("Informe o nome da loja");
+  mostrarToast("Informe o nome da loja", "warning");
   return false;
 }
 
 
   if (!email || erroEmail) {
-    alert("Email inválido");
+    mostrarToast("Email inválido", "warning");
     return false;
   }
 
   if (!telefone) {
-    alert("Telefone é obrigatório");
+    mostrarToast("Telefone é obrigatório", "warning");
     return false;
   }
 
   if (!cep || erroCep) {
-  alert("CEP inválido");
+  mostrarToast("CEP inválido", "warning");
   return false;
 }
 
 
   if (diasSelecionados.length === 0) {
-    alert("Selecione dias de funcionamento");
+    mostrarToast("Selecione dias de funcionamento", "warning");
     return false;
   }
   return true;
@@ -563,14 +577,18 @@ await deleteDoc(doc(db, "lojas", lojaId));
   await updateDoc(doc(db, "lojas", lojaId), dadosLoja);
 }
 
-   alert("Alterações salvas!");
-navigate("/lojas");
+ mostrarToast("Alterações salvas com sucesso!", "success");
+
+setTimeout(() => {
+  navigate("/lojas");
+}, 1500);
+
 
 
 
   } catch (error) {
-    console.error(error);
-    alert("Erro ao atualizar loja");
+  mostrarToast("Erro ao atualizar loja", "error");
+
   }
 };
 
@@ -1054,6 +1072,15 @@ onClick={salvarAlteracoes}
 
 
 </div>
+
+
+{toast.texto && (
+  <div className={`toast toast-${toast.tipo}`}>
+    {toast.texto}
+  </div>
+)}
+
+
 
     </div>
   );
