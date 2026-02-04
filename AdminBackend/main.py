@@ -1,3 +1,6 @@
+import os
+import json
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -9,7 +12,10 @@ from firebase_admin import credentials, firestore, storage
 # FIREBASE INIT
 # ===============================
 
-cred = credentials.Certificate("firebase-key.json")
+# chave firebase via variável de ambiente (Render)
+firebase_config = json.loads(os.environ["FIREBASE_KEY"])
+
+cred = credentials.Certificate(firebase_config)
 
 firebase_admin.initialize_app(cred, {
     "storageBucket": "shopping-digital-admin-b0b3d.firebasestorage.app"
@@ -83,5 +89,3 @@ def listar_lojas():
         resultado.append(data)
 
     return resultado
-
-
