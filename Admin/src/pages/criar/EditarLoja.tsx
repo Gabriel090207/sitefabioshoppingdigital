@@ -1075,7 +1075,15 @@ onClick={salvarAlteracoes}
 
 
 {toast.texto && (
-  <div className={`toast toast-${toast.tipo}`}>
+  <div
+    className={`toast ${
+      toast.tipo === "success"
+        ? "toast-success"
+        : toast.tipo === "warning"
+        ? "toast-warning"
+        : "toast-error"
+    }`}
+  >
     {toast.texto}
   </div>
 )}

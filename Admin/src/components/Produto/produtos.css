@@ -105,6 +105,8 @@ font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
 }
 
 
+
+
 /* ===== MOBILE ===== */
 
 @media (max-width: 768px) {
@@ -112,9 +114,11 @@ font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
     flex-direction: column;
   }
 
-  .button-primary {
-    width: 100%;
-  }
+  .button-produto {
+  width: 100%;
+}
+
+
 
   .produtos-grid {
     grid-template-columns: 1fr;
@@ -209,6 +213,17 @@ font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
   }
 }
 
+@keyframes dropdownHide {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
 @keyframes toastDown {
   from {
     opacity: 0;
@@ -217,5 +232,50 @@ font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
   to {
     opacity: 1;
     transform: translate(-50%, 0);
+  }
+}
+
+
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  min-width: 180px;
+
+  opacity: 0;
+  transform: translateY(-6px);
+  animation: dropdownShow 0.18s ease forwards;
+}
+
+.dropdown.closing {
+  animation: dropdownHide 0.18s ease forwards;
+}
+
+
+.dropdown.show {
+  animation: dropdownShow .18s ease forwards;
+}
+
+@keyframes dropdownShow {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dropdownHide {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
   }
 }

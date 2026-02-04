@@ -51,6 +51,34 @@ const navigate = useNavigate();
   const [imagensExistentes, setImagensExistentes] = useState<string[]>([]);
 
 
+  const [toast, setToast] = useState({
+  texto: "",
+  tipo: "success",
+});
+
+const mostrarToast = (
+  msg: string,
+  tipo: "success" | "warning" | "error" = "success"
+) => {
+  setToast({ texto: msg, tipo });
+
+  setTimeout(() => {
+    setToast({ texto: "", tipo: "success" });
+  }, 3000);
+};
+
+
+const formatarMoeda = (valor: string) => {
+  const numeros = valor.replace(/\D/g, "");
+
+  const valorNumero = Number(numeros) / 100;
+
+  return valorNumero.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+};
+
 
   /* ======================
      PREVIEW IMAGENS
@@ -82,7 +110,8 @@ const navigate = useNavigate();
 
 
     if (!nome.trim()) {
-      alert("Informe o nome do produto");
+     mostrarToast("Informe o nome do produto", "warning");
+
       return;
     }
 
@@ -132,12 +161,14 @@ const navigate = useNavigate();
         }
       );
 
-     alert("Produto atualizado com sucesso!");
+   mostrarToast("Produto atualizado com sucesso!", "success");
+
 navigate(`/lojas/${lojaId}/produtos`);
 
     } catch (error) {
       console.error(error);
-      alert("Erro ao salvar produto");
+      mostrarToast("Erro ao salvar produto", "error");
+
     }
   };
 
@@ -182,9 +213,13 @@ setPreviews(data.imagens || []);
     <div className="produto-page">
       {/* ===== TOPO ===== */}
       <div className="produto-header">
-        <Link to="/lojas" className="back-button">
+       <Link
+  to={`/lojas/${lojaId}/produtos`}
+  className="back-button"
+>
+
           <FiArrowLeft />
-          Voltar para lojas
+          Voltar para Produtos
         </Link>
 
         <h1>Editar Produto</h1>
@@ -274,26 +309,34 @@ setPreviews(data.imagens || []);
           <div className="field">
             <label>Preço</label>
             <input
-              value={preco}
-              onChange={(e) => setPreco(e.target.value)}
-            />
+  value={preco}
+  onChange={(e) =>
+    setPreco(formatarMoeda(e.target.value))
+  }
+/>
+
           </div>
 
           <div className="field">
             <label>Preço promocional</label>
             <input
-              value={precoPromo}
-              onChange={(e) => setPrecoPromo(e.target.value)}
-            />
+  value={precoPromo}
+    onChange={(e) =>
+    setPrecoPromo(formatarMoeda(e.target.value))
+  }
+/>
+
           </div>
 
           <div className="field">
             <label>Estoque</label>
             <input
-              type="number"
-              value={estoque}
-              onChange={(e) => setEstoque(e.target.value)}
-            />
+  value={precoPromo}
+   onChange={(e) =>
+    setPrecoPromo(formatarMoeda(e.target.value))
+  }
+/>
+
           </div>
         </div>
       </section>
@@ -338,6 +381,13 @@ setPreviews(data.imagens || []);
           Salvar Alterações
         </button>
       </div>
+
+      {toast.texto && (
+  <div className={`toast toast-${toast.tipo}`}>
+    {toast.texto}
+  </div>
+)}
+
     </div>
   );
 }

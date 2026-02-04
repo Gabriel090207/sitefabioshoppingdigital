@@ -22,6 +22,19 @@ export default function Produtos() {
   const { lojaId } = useParams();
 
   const [openMenu, setOpenMenu] = useState<number | null>(null);
+  const [closingMenu, setClosingMenu] = useState<number | null>(null);
+
+  const fecharMenu = () => {
+  if (openMenu === null) return;
+
+  setClosingMenu(openMenu);
+
+  setTimeout(() => {
+    setOpenMenu(null);
+    setClosingMenu(null);
+  }, 180);
+};
+
   const [produtos, setProdutos] = useState<any[]>([]);
   const [nomeLoja, setNomeLoja] = useState("");
 
@@ -39,11 +52,20 @@ export default function Produtos() {
      FECHAR MENU AO CLICAR FORA
   ====================== */
   useEffect(() => {
-    const fechar = () => setOpenMenu(null);
-    window.addEventListener("click", fechar);
+  const fechar = (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
 
-    return () => window.removeEventListener("click", fechar);
-  }, []);
+    if (target.closest(".dropdown")) return;
+
+    fecharMenu();
+  };
+
+  document.addEventListener("mousedown", fechar);
+
+  return () =>
+    document.removeEventListener("mousedown", fechar);
+}, [openMenu]);
+
 
   /* ======================
      CARREGAR PRODUTOS
@@ -190,15 +212,25 @@ export default function Produtos() {
               onClick={(e) => e.stopPropagation()}
             >
               <FiMoreVertical
-                onClick={() =>
-                  setOpenMenu(
-                    openMenu === index ? null : index
-                  )
-                }
+               onClick={() => {
+  if (openMenu === index) {
+    fecharMenu();
+  } else {
+    setOpenMenu(index);
+  }
+}}
+
               />
 
-              {openMenu === index && (
-                <div className="dropdown">
+             {(openMenu === index || closingMenu === index) && (
+  <div
+    className={`dropdown ${
+  closingMenu === index ? "closing" : ""
+}`}
+
+  >
+
+
                   <Link
                     to={`/lojas/${lojaId}/produtos/${produto.id}/editar`}
                   >

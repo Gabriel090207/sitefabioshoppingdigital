@@ -42,6 +42,11 @@
   font-size: 14px;
 }
 
+.search-box:focus-within {
+  border-color: var(--blue-light);
+
+}
+
 /* ===== FILTERS ===== */
 
 .filters {

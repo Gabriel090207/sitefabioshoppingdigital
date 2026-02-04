@@ -15,26 +15,46 @@ export default function ProductCard({
   price,
   oldPrice,
   store,
-
 }: ProductCardProps) {
-  /* garante número */
-  const preco = Number(price || 0);
-  const precoAntigo = oldPrice ? Number(oldPrice) : undefined;
+
+  // converte qualquer formato para número
+  const parsePrice = (value: number | string | undefined) => {
+  if (!value) return 0;
+
+  if (typeof value === "number") return value;
+
+  // remove tudo que não é número, vírgula ou ponto
+  let cleaned = value.replace(/[^\d.,-]/g, "");
+
+  // se tiver vírgula, assume formato BR
+  if (cleaned.includes(",")) {
+    cleaned = cleaned.replace(/\./g, "").replace(",", ".");
+  }
+
+  const number = Number(cleaned);
+  return isNaN(number) ? 0 : number;
+};
+
+
+  const preco = parsePrice(price);
+  const precoAntigo = oldPrice ? parsePrice(oldPrice) : undefined;
+
+
+  console.log("PRICE RECEBIDO:", price);
 
   return (
     <div className="product-card">
       {/* IMAGEM */}
       <div className="product-image">
-  <img
-    src={
-      image && image !== ""
-        ? image
-        : "https://via.placeholder.com/400x300?text=Sem+Imagem"
-    }
-    alt={name || "Produto"}
-  />
-</div>
-
+        <img
+          src={
+            image && image !== ""
+              ? image
+              : "https://via.placeholder.com/400x300?text=Sem+Imagem"
+          }
+          alt={name || "Produto"}
+        />
+      </div>
 
       <div className="product-info">
         {/* NOME */}
@@ -47,18 +67,16 @@ export default function ProductCard({
           </span>
         )}
 
-       
-
         {/* PREÇOS */}
         <div className="product-price">
           {precoAntigo && precoAntigo > preco && (
             <span className="old-price">
-              R$ {precoAntigo.toFixed(2)}
+              R$ {precoAntigo.toFixed(2).replace(".", ",")}
             </span>
           )}
 
           <span className="price">
-            R$ {preco.toFixed(2)}
+            R$ {preco.toFixed(2).replace(".", ",")}
           </span>
         </div>
 

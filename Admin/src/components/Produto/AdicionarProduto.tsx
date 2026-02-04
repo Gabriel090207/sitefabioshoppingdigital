@@ -34,6 +34,19 @@ export default function AdicionarProduto() {
 
   const [preco, setPreco] = useState("");
   const [precoPromo, setPrecoPromo] = useState("");
+
+
+    const formatarMoeda = (valor: string) => {
+  const numeros = valor.replace(/\D/g, "");
+
+  const valorNumero = Number(numeros) / 100;
+
+  return valorNumero.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+};
+
   const [estoque, setEstoque] = useState("");
 
   const [marca, setMarca] = useState("");
@@ -42,6 +55,24 @@ export default function AdicionarProduto() {
 
   const [imagens, setImagens] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+
+
+  const [toast, setToast] = useState({
+  texto: "",
+  tipo: "success",
+});
+
+
+const mostrarToast = (
+  msg: string,
+  tipo: "success" | "warning" | "error" = "success"
+) => {
+  setToast({ texto: msg, tipo });
+
+  setTimeout(() => {
+    setToast({ texto: "", tipo: "success" });
+  }, 3000);
+};
 
   /* ======================
      PREVIEW IMAGENS
@@ -98,7 +129,8 @@ const removerImagem = (index: number) => {
     if (!lojaId) return;
 
     if (!nome.trim()) {
-      alert("Informe o nome do produto");
+      mostrarToast("Informe o nome do produto", "warning");
+
       return;
     }
 
@@ -153,11 +185,13 @@ const produtoId = `${nomeBase}-${Date.now()}`;
         }
       );
 
-      alert("Produto salvo com sucesso!");
+      mostrarToast("Produto salvo com sucesso!", "success");
+
       limparFormulario();
     } catch (error) {
       console.error(error);
-      alert("Erro ao salvar produto");
+      mostrarToast("Erro ao salvar produto", "error");
+
     }
   };
 
@@ -257,26 +291,36 @@ const produtoId = `${nomeBase}-${Date.now()}`;
           <div className="field">
             <label>Preço</label>
             <input
-              value={preco}
-              onChange={(e) => setPreco(e.target.value)}
-            />
+  value={preco}
+  onChange={(e) =>
+    setPreco(formatarMoeda(e.target.value))
+  }
+/>
+
           </div>
 
           <div className="field">
             <label>Preço promocional</label>
-            <input
-              value={precoPromo}
-              onChange={(e) => setPrecoPromo(e.target.value)}
-            />
+           <input
+  value={precoPromo}
+  onChange={(e) =>
+    setPrecoPromo(formatarMoeda(e.target.value))
+  }
+/>
+
           </div>
 
           <div className="field">
             <label>Estoque</label>
             <input
-              type="number"
-              value={estoque}
-              onChange={(e) => setEstoque(e.target.value)}
-            />
+  inputMode="numeric"
+  pattern="[0-9]*"
+  value={estoque}
+  onChange={(e) =>
+    setEstoque(e.target.value.replace(/\D/g, ""))
+  }
+/>
+
           </div>
         </div>
       </section>
@@ -321,6 +365,14 @@ const produtoId = `${nomeBase}-${Date.now()}`;
           Salvar Produto
         </button>
       </div>
+
+
+      {toast.texto && (
+  <div className={`toast toast-${toast.tipo}`}>
+    {toast.texto}
+  </div>
+)}
+
     </div>
   );
 }

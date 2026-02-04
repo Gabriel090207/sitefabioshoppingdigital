@@ -54,22 +54,31 @@ export default function VisualizarLoja() {
           const data: any = docItem.data();
 
           /* converte preço string -> número */
-          const preco =
-            typeof data.preco === "string"
-              ? parseFloat(data.preco.replace(",", "."))
-              : data.preco || 0;
+          const parsePrice = (value: any) => {
+  if (!value) return 0;
 
-          const precoPromo =
-            typeof data.precoPromocional === "string"
-              ? parseFloat(data.precoPromocional.replace(",", "."))
-              : data.precoPromocional;
+  if (typeof value === "number") return value;
+
+  let cleaned = String(value).replace(/[^\d.,-]/g, "");
+
+  if (cleaned.includes(",")) {
+    cleaned = cleaned.replace(/\./g, "").replace(",", ".");
+  }
+
+  const number = Number(cleaned);
+  return isNaN(number) ? 0 : number;
+};
+
+const preco = parsePrice(data.preco);
+const precoPromo = parsePrice(data.precoPromocional);
+
 
           listaProdutos.push({
             id: docItem.id,
 
             name: data.nome || "Produto",
-            price: precoPromo ?? preco,
-            oldPrice: precoPromo ? preco : undefined,
+            price: precoPromo > 0 ? precoPromo : preco,
+oldPrice: precoPromo > 0 ? preco : undefined,
 
             /* pega primeira imagem */
             image:

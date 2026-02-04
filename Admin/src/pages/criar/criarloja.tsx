@@ -1,6 +1,7 @@
 import "./criarloja.css";
 import { FiUploadCloud } from "react-icons/fi";
 import { useState } from "react";
+import { useRef, useEffect } from "react";
 
 
 import { storage } from "../../services/firebase";
@@ -12,6 +13,62 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 
 export default function CriarLoja() {
+
+
+  const categorias = [
+  "Restaurante",
+  "Lanchonete",
+  "Hamburgueria",
+  "Pizzaria",
+  "Padaria",
+  "Confeitaria",
+  "Sorveteria",
+  "Açaíteria",
+  "Cafeteria",
+  "Comida Japonesa",
+  "Comida Árabe",
+  "Comida Brasileira",
+  "Marmitaria",
+  "Mercado",
+  "Supermercado",
+  "Mini Mercado",
+  "Atacado",
+  "Hortifruti",
+  "Casa de Carnes",
+  "Peixaria",
+  "Adega",
+  "Distribuidora de Bebidas",
+  "Farmácia",
+  "Drogaria",
+  "Pet Shop",
+  "Clínica Veterinária",
+  "Loja de Roupas",
+  "Calçados",
+  "Moda Infantil",
+  "Móveis",
+  "Decoração",
+  "Utilidades Domésticas",
+  "Eletrônicos",
+  "Informática",
+  "Celulares e Acessórios",
+  "Serviços",
+  "Salão de Beleza",
+  "Barbearia",
+  "Oficina Mecânica",
+  "Loja Variada",
+  "Outros",
+];
+
+const [catOpen, setCatOpen] = useState(false);
+const [catBusca, setCatBusca] = useState("");
+
+const categoriasFiltradas = categorias.filter((c) =>
+  c.toLowerCase().includes(catBusca.toLowerCase())
+);
+
+const selectRef = useRef<HTMLDivElement | null>(null);
+
+
 const [cpfCnpj, setCpfCnpj] = useState<string>("");
 const [cpfResponsavel, setCpfResponsavel] = useState<string>("");
 const [telefone, setTelefone] = useState<string>("");
@@ -27,6 +84,27 @@ const [erroCep, setErroCep] = useState("");
 
 const [tempoPreparo, setTempoPreparo] = useState("00:00");
 
+
+const [toast, setToast] = useState<{
+  texto: string;
+  tipo: "success" | "warning" | "error";
+}>({
+  texto: "",
+  tipo: "success",
+});
+
+
+const mostrarToast = (
+  msg: string,
+  tipo: "success" | "warning" | "error" = "success"
+) => {
+
+  setToast({ texto: msg, tipo });
+
+  setTimeout(() => {
+    setToast({ texto: "", tipo: "success" });
+  }, 3000);
+};
 
 
 
@@ -107,11 +185,14 @@ const [horarioFechamento, setHorarioFechamento] = useState("");
 
 if (numeros.length === 11) {
   setErroCpfCnpj(validarCPF(v) ? "" : "CPF inválido");
+
 } else if (numeros.length === 14) {
   setErroCpfCnpj(validarCNPJ(v) ? "" : "CNPJ inválido");
+
 } else {
   setErroCpfCnpj("");
 }
+
 
   };
 
@@ -297,39 +378,46 @@ const toggleDia = (dia: string) => {
 
 const validarFormulario = () => {
   if (!cpfCnpj || erroCpfCnpj) {
-    alert("CPF ou CNPJ inválido");
+   mostrarToast("CPF ou CNPJ inválido", "warning");
+
     return false;
   }
 
   if (!cpfResponsavel || erroCpf) {
-    alert("CPF do responsável inválido");
+   mostrarToast("CPF do responsável inválido", "warning");
+
     return false;
   }
 
   if (!nomeLoja.trim()) {
-  alert("Informe o nome da loja");
+mostrarToast("Informe o nome da loja", "warning");
+
   return false;
 }
 
 
   if (!email || erroEmail) {
-    alert("Email inválido");
+    mostrarToast("Email inválido", "warning");
+
     return false;
   }
 
   if (!telefone) {
-    alert("Telefone é obrigatório");
+   mostrarToast("Telefone é obrigatório", "warning");
+
     return false;
   }
 
   if (!cep || erroCep) {
-  alert("CEP inválido");
+ mostrarToast("CEP inválido", "warning");
+
   return false;
 }
 
 
   if (diasSelecionados.length === 0) {
-    alert("Selecione dias de funcionamento");
+   mostrarToast("Selecione dias de funcionamento", "warning");
+
     return false;
   }
   return true;
@@ -369,7 +457,8 @@ const salvarLoja = async () => {
 
     if (!fotoPerfil || !fotoBanner || !fotoCapa)
  {
-      alert("Envie todas as imagens");
+      mostrarToast("Envie todas as imagens da loja", "warning");
+
       return;
     }
 
@@ -468,40 +557,62 @@ atendimento: {
       createdAt: serverTimestamp(),
     });
 
-    alert("Loja salva com sucesso!");
+   mostrarToast("Loja criada com sucesso!");
+
     limparFormulario();
     
 
   } catch (error) {
     console.error(error);
-    alert("Erro ao salvar loja");
+    mostrarToast("Erro ao salvar loja", "error");
+
   }
 };
 
 
 const limparFormulario = () => {
+  /* ===== DADOS BÁSICOS ===== */
+  setNomeLoja("");
+  setNomeFantasia("");
+  setCategoria("");
+  setSubcategoria("");
+  setDescricao("");
+
+  /* ===== DOCUMENTOS ===== */
   setCpfCnpj("");
   setCpfResponsavel("");
+  setErroCpf("");
+  setErroCpfCnpj("");
+
+  setRazaoSocial("");
+  setNomeResponsavel("");
+
+  /* ===== CONTATO ===== */
   setTelefone("");
   setWhatsapp("");
+  setEmail("");
+  setErroEmail("");
 
+  /* ===== ENDEREÇO ===== */
   setCep("");
   setRua("");
   setBairro("");
   setCidade("");
   setEstado("");
+  setNumero("");
+  setPontoReferencia("");
   setErroCep("");
 
+  /* ===== ATENDIMENTO ===== */
+  setAreaAtendimento("");
+
+  /* ===== OPERAÇÃO ===== */
+  setDiasSelecionados([]);
+  setHorarioAbertura("");
+  setHorarioFechamento("");
   setTempoPreparo("00:00");
 
-  setEmail("");
-  setErroEmail("");
-  setErroCpf("");
-  setErroCpfCnpj("");
-
-  setDiasSelecionados([]);
-
-  // imagens
+  /* ===== IMAGENS ===== */
   setFotoPerfil(null);
   setPreviewPerfil("");
 
@@ -510,7 +621,28 @@ const limparFormulario = () => {
 
   setFotoCapa(null);
   setPreviewCapa("");
+
+  /* ===== SELECT CUSTOM ===== */
+  setCatBusca("");
+  setCatOpen(false);
 };
+
+
+
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      selectRef.current &&
+      !selectRef.current.contains(event.target as Node)
+    ) {
+      setCatOpen(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () =>
+    document.removeEventListener("mousedown", handleClickOutside);
+}, []);
 
 
   return (
@@ -545,16 +677,55 @@ const limparFormulario = () => {
 
           <div className="field">
             <label>Categoria principal</label>
-            <select
-  value={categoria}
-  onChange={(e) => setCategoria(e.target.value)}
+            <div className="field">
+
+
+<div
+  ref={selectRef}
+  className={`select-custom ${catOpen ? "open" : ""}`}
+
+  tabIndex={0}
+  onClick={() => setCatOpen((v) => !v)}
 >
-  <option value="">Selecione</option>
-  <option value="Mercado">Mercado</option>
-  <option value="Restaurante">Restaurante</option>
-  <option value="Padaria">Padaria</option>
-  <option value="Serviços">Serviços</option>
-</select>
+
+    <span className={`select-value ${!categoria ? "placeholder" : ""}`}>
+      {categoria || "Selecione a categoria"}
+    </span>
+
+    <span className="select-arrow">▾</span>
+
+    {catOpen && (
+      <div className="select-dropdown" onClick={(e) => e.stopPropagation()}>
+        
+
+        <div className="select-list">
+          {categoriasFiltradas.map((c) => (
+            <button
+  type="button"
+  key={c}
+  className="select-item"
+  onClick={(e) => {
+    e.stopPropagation();   // <- IMPORTANTE
+    setCategoria(c);
+    setCatOpen(false);
+    setCatBusca("");
+  }}
+>
+
+              {c}
+            </button>
+          ))}
+
+          {categoriasFiltradas.length === 0 && (
+            <div className="select-empty">Nenhuma categoria encontrada</div>
+          )}
+        </div>
+      </div>
+    )}
+  </div>
+</div>
+
+
 
           </div>
 
@@ -988,6 +1159,13 @@ const limparFormulario = () => {
 
 
 </div>
+
+{toast.texto && (
+  <div className={`toast toast-${toast.tipo}`}>
+    {toast.texto}
+  </div>
+)}
+
 
     </div>
   );
