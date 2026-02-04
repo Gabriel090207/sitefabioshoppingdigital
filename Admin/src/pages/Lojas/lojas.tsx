@@ -26,6 +26,8 @@ export default function Lojas() {
   const [lojaParaExcluir, setLojaParaExcluir] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
 
+  const [busca, setBusca] = useState("");
+
   /* ================= MENU ================= */
   const closeMenu = () => {
     if (openMenu !== null) {
@@ -106,6 +108,15 @@ export default function Lojas() {
     }
   };
 
+  const lojasFiltradas = lojas.filter((loja) => {
+  const texto = busca.toLowerCase();
+
+  return (
+    loja.nome?.toLowerCase().includes(texto) ||
+    loja.categoria?.toLowerCase().includes(texto)
+  );
+});
+
   /* ================= UI ================= */
   return (
     <div className="lojas-page">
@@ -115,13 +126,24 @@ export default function Lojas() {
       <div className="lojas-actions">
         <div className="search-box">
           <FiSearch />
-          <input placeholder="Buscar loja..." />
+          <input
+  placeholder="Buscar loja..."
+  value={busca}
+  onChange={(e) => setBusca(e.target.value)}
+/>
+
         </div>
       </div>
 
       {/* LISTA */}
       <div className="lojas-grid">
-        {lojas.map((loja, index) => (
+
+        {lojasFiltradas.length === 0 && (
+  <p>Nenhuma loja encontrada.</p>
+)}
+
+        {lojasFiltradas.map((loja, index) => (
+
           <div key={loja.id} className="loja-card">
             <div className="loja-info">
               <div className="loja-logo">

@@ -28,6 +28,8 @@ export default function Produtos() {
   const [mensagem, setMensagem] = useState("");
   const [produtoExcluir, setProdutoExcluir] = useState<any>(null);
 
+  const [busca, setBusca] = useState("");
+
   const mostrarMensagem = (texto: string) => {
     setMensagem(texto);
     setTimeout(() => setMensagem(""), 2500);
@@ -113,6 +115,16 @@ export default function Produtos() {
     carregarProdutos();
   };
 
+
+  const produtosFiltrados = produtos.filter((produto) => {
+  const texto = busca.toLowerCase();
+
+  return (
+    produto.nome?.toLowerCase().includes(texto) ||
+    produto.categoria?.toLowerCase().includes(texto)
+  );
+});
+
   return (
     <div className="produtos-page">
       {/* HEADER */}
@@ -132,7 +144,12 @@ export default function Produtos() {
       <div className="produtos-actions">
         <div className="search-box">
           <FiSearch />
-          <input placeholder="Buscar produto..." />
+          <input
+  placeholder="Buscar produto..."
+  value={busca}
+  onChange={(e) => setBusca(e.target.value)}
+/>
+
         </div>
 
         <Link to={`/lojas/${lojaId}/produtos/adicionar`}>
@@ -144,7 +161,12 @@ export default function Produtos() {
 
       {/* LISTA */}
       <div className="produtos-grid">
-        {produtos.map((produto, index) => (
+        {produtosFiltrados.length === 0 && (
+  <p>Nenhum produto encontrado.</p>
+)}
+
+      {produtosFiltrados.map((produto, index) => (
+
           <div key={produto.id} className="produto-card">
             <div className="produto-info">
               <div className="produto-img">
